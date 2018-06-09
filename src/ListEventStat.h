@@ -9,10 +9,18 @@ namespace eventstats
     {
     public:
         ListEventStat();
+        ListEventStat(const ListEventStat& src);
+        ListEventStat(ListEventStat&& src) noexcept;
+
         virtual ~ListEventStat();
+
+        virtual ListEventStat& operator=(const ListEventStat& rhs);
+        virtual ListEventStat& operator=(ListEventStat&& rhs) noexcept;
+
         virtual void count(unsigned int timestamp);
-        virtual unsigned int getStat(unsigned int pastSeconds) const;
+        virtual unsigned int getStat(unsigned int pastSeconds);
+
     private:
-//        std::priority_queue<unsigned int, std::list<unsigned int>> mEventTimestamps;
+    	std::priority_queue<unsigned int> mEventTimestamps;
     };
 }
