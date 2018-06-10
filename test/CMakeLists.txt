@@ -6,3 +6,6 @@ target_link_libraries(test_ListEventStat gtest gtest_main pthread)
 
 add_executable(test_EventCounter ../src/utility.cpp ../src/EventCounter.cpp ../src/EventStat.cpp ../src/ListEventStat.cpp ../src/EventCounter.cpp test_EventCounter.cpp)
 target_link_libraries(test_EventCounter gtest gtest_main pthread)
+
+add_executable(test_QueryProcessor ../src/utility.cpp ../src/EventCounter.cpp ../src/EventStat.cpp ../src/ListEventStat.cpp ../src/EventCounter.cpp ../src/QueryProcessor.cpp test_QueryProcessor.cpp)
+target_link_libraries(test_QueryProcessor gtest gtest_main pthread)
