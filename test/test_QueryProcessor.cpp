@@ -9,7 +9,7 @@ TEST (QueryProcessor, BasicUsage)
 {
     EventCounter eventCounter;
     QueryProcessor queryProcessor(eventCounter);
-    EXPECT_EQ (queryProcessor.getStat("60s abc"), 0);
+    EXPECT_THROW (queryProcessor.getStat("60s abc"), out_of_range);
     eventCounter.countEvent("abc", getSecondsFromEpoch() - 10);
     EXPECT_EQ (queryProcessor.getStat("60s abc"), 1);
     EXPECT_EQ (queryProcessor.getStat("10s abc"), 1);
@@ -23,6 +23,20 @@ TEST (QueryProcessor, BasicUsage)
     eventCounter.countEvent("abc", getSecondsFromEpoch() - (3600 * 24 + 1000));
     EXPECT_EQ (queryProcessor.getStat("1d abc"), 3);
     EXPECT_EQ (queryProcessor.getStat("2d abc"), 4);
+}
+
+TEST (QueryProcessor, QueryPattern)
+{
+    EventCounter eventCounter;
+    QueryProcessor queryProcessor(eventCounter);
+    eventCounter.countEvent("abc", getSecondsFromEpoch() - 10);
+    EXPECT_EQ (queryProcessor.getStat("60s abc"), 1);    
+    EXPECT_THROW (queryProcessor.getStat("s abc"), InvalidQuery);
+    EXPECT_THROW (queryProcessor.getStat("60g abc"), InvalidQuery);
+    EXPECT_THROW (queryProcessor.getStat("60sabc"), InvalidQuery);
+    EXPECT_THROW (queryProcessor.getStat("60s  abc"), InvalidQuery);
+    EXPECT_THROW (queryProcessor.getStat("60s abc_"), InvalidQuery);
+    EXPECT_THROW (queryProcessor.getStat("60s 4abc"), InvalidQuery);
 }
 
 int main(int argc, char **argv)

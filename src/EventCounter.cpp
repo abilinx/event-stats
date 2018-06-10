@@ -1,5 +1,6 @@
 #include <iostream>
 #include <utility>
+#include <exception>
 #include "utility.h"
 #include "EventCounter.h"
 #include "ListEventStat.h"
@@ -44,7 +45,7 @@ unsigned int EventCounter::getStat(const string& eventTag, unsigned int pastSeco
         stat = eventStatItr->second.getStat(pastSeconds);
     }
     else {
-        // TODO: Throw out of range exception here.
+        throw out_of_range("\"" + eventTag + "\" is not valid event tag.");
     }
     return stat;
 }

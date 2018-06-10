@@ -9,3 +9,13 @@ unsigned int eventstats::getSecondsFromEpoch()
     auto nowEpoch = now.time_since_epoch();  // transform the time into a duration since the epoch
     return chrono::duration_cast<chrono::seconds>(nowEpoch).count();
 }
+
+InvalidQuery::InvalidQuery(const string& query)
+	: mMessage("\"" + query + "\" is not valid.")
+{
+}
+
+const char* InvalidQuery::what() const noexcept
+{
+	return mMessage.c_str();
+}

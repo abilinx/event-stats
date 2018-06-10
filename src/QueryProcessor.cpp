@@ -1,5 +1,7 @@
 #include <iostream>
 #include <sstream>
+#include <regex>
+#include "utility.h"
 #include "QueryProcessor.h"
 #include "EventCounter.h"
 using namespace std;
@@ -17,6 +19,10 @@ QueryProcessor::~QueryProcessor()
 unsigned int QueryProcessor::getStat(const string& query)
 {
     cout << "Query: " << query << endl;
+    if (! QueryProcessor::checkQuery(query)) {
+        throw InvalidQuery(query);
+    }
+
     istringstream queryStream(query);
     string timePart = "";
     string eventTag = "";
@@ -45,4 +51,10 @@ unsigned int QueryProcessor::getStat(const string& query)
 
     cout << "querying " << eventTag << " event in past " << pastSeconds << " second(s).." << endl;
     return mEventCounter.getStat(eventTag, pastSeconds);
+}
+
+bool QueryProcessor::checkQuery(const string& query)
+{
+    regex pattern("\\d+[smhd] [a-zA-Z][a-zA-Z0-9]*");
+    return regex_match(query, pattern);
 }
