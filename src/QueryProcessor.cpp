@@ -44,5 +44,5 @@ unsigned int QueryProcessor::getStat(const string& query)
     }
 
     cout << "querying " << eventTag << " event in past " << pastSeconds << " second(s).." << endl;
-    return mEventCounter.getStat(pastSeconds, eventTag);
+    return mEventCounter.getStat(eventTag, pastSeconds);
 }

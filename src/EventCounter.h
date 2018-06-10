@@ -13,7 +13,7 @@ namespace eventstats
         EventCounter(unsigned int estimatedEventTypes = 1000);
         virtual ~EventCounter();
         virtual void countEvent(const std::string& eventTag, unsigned int timestamp = 0);
-        virtual unsigned int getStat(unsigned int pastSeconds, const std::string& eventTag) const;
+        virtual unsigned int getStat(const std::string& eventTag, unsigned int pastSeconds) const;
     private:
         std::unordered_map<std::string, EventStat&> mEventStats;
     };

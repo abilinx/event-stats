@@ -1,5 +1,6 @@
 #include <iostream>
 #include <utility>
+#include "utility.h"
 #include "EventCounter.h"
 #include "ListEventStat.h"
 #include "CompressedEventStat.h"
@@ -18,7 +19,9 @@ EventCounter::~EventCounter()
 void EventCounter::countEvent(const string& eventTag, unsigned int timestamp)
 {
     cout << "counting event " << eventTag << " at time " << timestamp << ".." << endl;
-    // TODO: Set timestamp to current time if it is 0.
+    if (timestamp == 0) {
+        timestamp = getSecondsFromEpoch();
+    }
     auto eventStatItr = mEventStats.find(eventTag);
     if (eventStatItr != mEventStats.end()) {
         cout << "found event: " << eventStatItr->first << endl;
@@ -32,7 +35,7 @@ void EventCounter::countEvent(const string& eventTag, unsigned int timestamp)
     }
 }
 
-unsigned int EventCounter::getStat(unsigned int pastSeconds, const string& eventTag) const
+unsigned int EventCounter::getStat(const string& eventTag, unsigned int pastSeconds) const
 {
     cout << "getting stats of " << eventTag << ".." << endl;
     unsigned int stat = 0;

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <algorithm>
-#include <chrono>
 #include <iterator>
+#include "utility.h"
 #include "ListEventStat.h"
 using namespace std;
 using namespace eventstats;
@@ -58,7 +58,7 @@ void ListEventStat::count(unsigned int timestamp)
 {
 	++mNumofCounts;
     if (timestamp == 0) {
-        timestamp = ListEventStat::getSecondsFromEpoch();
+        timestamp = getSecondsFromEpoch();
     }
     cout << "counting event in time " << timestamp << " in ListEventStat.." << endl;
     auto insertPosition = lower_bound(mEventTimestamps.begin(), mEventTimestamps.end(), timestamp);
@@ -69,8 +69,8 @@ unsigned int ListEventStat::getStat(unsigned int pastSeconds)
 {
 	++mNumofGetStats;
     cout << "getting stat in past seconds " << pastSeconds << " in ListEventStat.." << endl;
-    auto startTimestamp = ListEventStat::getSecondsFromEpoch() - pastSeconds;
-    cout << "finding timestamps between " << startTimestamp << " and " << ListEventStat::getSecondsFromEpoch() << endl;
+    auto startTimestamp = getSecondsFromEpoch() - pastSeconds;
+    cout << "finding timestamps between " << startTimestamp << " and " << getSecondsFromEpoch() << endl;
     auto startPosition = lower_bound(mEventTimestamps.begin(), mEventTimestamps.end(), startTimestamp);
     return distance(startPosition, mEventTimestamps.end());
 }
