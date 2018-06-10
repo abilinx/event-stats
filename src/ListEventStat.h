@@ -1,5 +1,4 @@
 #pragma once
-#include <queue>
 #include <list>
 #include "EventStat.h"
 
@@ -17,10 +16,10 @@ namespace eventstats
         virtual ListEventStat& operator=(const ListEventStat& rhs);
         virtual ListEventStat& operator=(ListEventStat&& rhs) noexcept;
 
-        virtual void count(unsigned int timestamp);
+        virtual void count(unsigned int timestamp = 0);
         virtual unsigned int getStat(unsigned int pastSeconds);
 
     private:
-    	std::priority_queue<unsigned int> mEventTimestamps;
+        std::list<unsigned int> mEventTimestamps;
     };
 }

@@ -7,7 +7,7 @@ using namespace std;
 using namespace eventstats;
 
 EventCounter::EventCounter(unsigned int estimatedEventTypes)
-//    : mEventStats{2 * estimatedEventTypes}
+    : mEventStats(2 * estimatedEventTypes)
 {
 }
 
@@ -15,16 +15,20 @@ EventCounter::~EventCounter()
 {
 }
 
-void EventCounter::countEvent(unsigned int timestamp, const string& eventTag)
+void EventCounter::countEvent(const string& eventTag, unsigned int timestamp)
 {
     cout << "counting event " << eventTag << " at time " << timestamp << ".." << endl;
-    if (mEventStats.count(eventTag) == 1) {
-        mEventStats.at(eventTag)->count(timestamp);
+    // TODO: Set timestamp to current time if it is 0.
+    auto eventStatItr = mEventStats.find(eventTag);
+    if (eventStatItr != mEventStats.end()) {
+        cout << "found event: " << eventStatItr->first << endl;
+        eventStatItr->second.count(timestamp);
     }
     else {
-        auto eventStatPtr = make_unique<EventStat>(new ListEventStat());
-        eventStatPtr->count(timestamp);
-        mEventStats.insert(make_pair(eventTag, eventStatPtr));
+        auto listEventStat = new ListEventStat();
+        listEventStat->count(timestamp);
+        pair<string, EventStat&> eventStatPair(eventTag, *listEventStat);
+        mEventStats.insert(eventStatPair);
     }
 }
 
@@ -32,9 +36,9 @@ unsigned int EventCounter::getStat(unsigned int pastSeconds, const string& event
 {
     cout << "getting stats of " << eventTag << ".." << endl;
     unsigned int stat = 0;
-    if (mEventStats.count(eventTag) == 1) {
-        const auto& eventStat = mEventStats.at(eventTag);
-        stat = eventStat->getStat(pastSeconds);
+    auto eventStatItr = mEventStats.find(eventTag);
+    if (eventStatItr != mEventStats.end()) {
+        stat = eventStatItr->second.getStat(pastSeconds);
     }
     else {
         // TODO: Throw out of range exception here.

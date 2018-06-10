@@ -14,7 +14,7 @@ namespace eventstats
         virtual EventStat& operator=(const EventStat& rhs);
         virtual EventStat& operator=(EventStat&& rhs) noexcept;
 
-        virtual void count(unsigned int timestamp);
+        virtual void count(unsigned int timestamp = 0);
         virtual unsigned int getStat(unsigned int pastSeconds);
 
         unsigned int getNumofCounts() const;

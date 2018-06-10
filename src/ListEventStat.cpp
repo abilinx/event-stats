@@ -1,74 +1,76 @@
 #include <iostream>
+#include <algorithm>
+#include <chrono>
+#include <iterator>
 #include "ListEventStat.h"
 using namespace std;
 using namespace eventstats;
 
 ListEventStat::ListEventStat()
 {
+    cout << "default ctor of ListEventStat" << endl;
 }
 
 ListEventStat::ListEventStat(const ListEventStat& src)
-	: EventStat(src)
+    : EventStat(src),
+      mEventTimestamps(src.mEventTimestamps)
 {
-	while (src.mEventTimestamps.size() > 0) {
-		mEventTimestamps.push(src.mEventTimestamps.top());
-	}
+    cout << "copy ctor of ListEventStat" << endl;
 }
 
 ListEventStat::ListEventStat(ListEventStat&& src) noexcept
-	: EventStat(move(src))
+    : EventStat(move(src)),
+      mEventTimestamps(move(src.mEventTimestamps))
 {
-	while (src.mEventTimestamps.size() > 0) {
-		mEventTimestamps.push(src.mEventTimestamps.top());
-		src.mEventTimestamps.pop();
-	}
+    cout << "move ctor of ListEventStat" << endl;
 }
 
 ListEventStat::~ListEventStat()
 {
+    cout << "dtor of ListEventStat" << endl;
 }
 
 ListEventStat& ListEventStat::operator=(const ListEventStat& rhs)
 {
+    cout << "copy assignment of ListEventStat" << endl;
 	if (this == &rhs) {
 		return *this;
 	}
-	while (mEventTimestamps.size() > 0) {
-		mEventTimestamps.pop();
-	}
-	while (rhs.mEventTimestamps.size() > 0) {
-		mEventTimestamps.push(rhs.mEventTimestamps.top());
-	}
+    EventStat::operator=(rhs);
+    mEventTimestamps.clear();
+    mEventTimestamps.insert(mEventTimestamps.begin(), rhs.mEventTimestamps.begin(), rhs.mEventTimestamps.end());
 	return *this;
 }
 
 ListEventStat& ListEventStat::operator=(ListEventStat&& rhs) noexcept
 {
+    cout << "move assignment of ListEventStat" << endl;
 	if (this == &rhs) {
 		return *this;
 	}
-	EventStat::operator=(move(rhs));
-	while (mEventTimestamps.size() > 0) {
-		mEventTimestamps.pop();
-	}
-	while (rhs.mEventTimestamps.size() > 0) {
-		mEventTimestamps.push(rhs.mEventTimestamps.top());
-		rhs.mEventTimestamps.pop();
-	}
+    EventStat::operator=(move(rhs));
+    mEventTimestamps.clear();
+    mEventTimestamps = move(rhs.mEventTimestamps);
 	return *this;
 }
 
 void ListEventStat::count(unsigned int timestamp)
 {
 	++mNumofCounts;
+    if (timestamp == 0) {
+        timestamp = ListEventStat::getSecondsFromEpoch();
+    }
     cout << "counting event in time " << timestamp << " in ListEventStat.." << endl;
-	mEventTimestamps.push(timestamp);
+    auto insertPosition = lower_bound(mEventTimestamps.begin(), mEventTimestamps.end(), timestamp);
+    mEventTimestamps.insert(insertPosition, timestamp);
 }
 
 unsigned int ListEventStat::getStat(unsigned int pastSeconds)
 {
 	++mNumofGetStats;
     cout << "getting stat in past seconds " << pastSeconds << " in ListEventStat.." << endl;
-    // TODO: Return stat in past seconds.
-    return 0;
+    auto startTimestamp = ListEventStat::getSecondsFromEpoch() - pastSeconds;
+    cout << "finding timestamps between " << startTimestamp << " and " << ListEventStat::getSecondsFromEpoch() << endl;
+    auto startPosition = lower_bound(mEventTimestamps.begin(), mEventTimestamps.end(), startTimestamp);
+    return distance(startPosition, mEventTimestamps.end());
 }
