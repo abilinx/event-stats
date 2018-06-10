@@ -7,7 +7,7 @@
 using namespace std;
 using namespace eventstats;
 
-QueryProcessor::QueryProcessor(const eventstats::EventCounter& eventCounter)
+QueryProcessor::QueryProcessor(EventCounter& eventCounter)
     : mEventCounter(eventCounter)
 {
 }

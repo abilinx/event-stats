@@ -9,13 +9,13 @@ namespace eventstats
     class QueryProcessor
     {
     public:
-        QueryProcessor(const EventCounter& eventCounter);
+        QueryProcessor(EventCounter& eventCounter);
         virtual ~QueryProcessor();
         unsigned int getStat(const std::string& query);
 
     private:
         static bool checkQuery(const std::string& query);
 
-        const EventCounter& mEventCounter;
+        EventCounter& mEventCounter;
     };
 }

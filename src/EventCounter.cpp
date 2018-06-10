@@ -9,7 +9,9 @@ using namespace std;
 using namespace eventstats;
 
 EventCounter::EventCounter(unsigned int estimatedEventTypes)
-    : mEventStats(2 * estimatedEventTypes)
+    : mEventStats(2 * estimatedEventTypes),
+      mNumofCounts(0),
+      mNumofGetStats(0)
 {
 }
 
@@ -19,10 +21,11 @@ EventCounter::~EventCounter()
 
 void EventCounter::countEvent(const string& eventTag, unsigned int timestamp)
 {
-    cout << "counting event " << eventTag << " at time " << timestamp << ".." << endl;
+    ++mNumofCounts;
     if (timestamp == 0) {
         timestamp = getSecondsFromEpoch();
     }
+    cout << "counting event " << eventTag << " at time " << timestamp << ".." << endl;
     auto eventStatItr = mEventStats.find(eventTag);
     if (eventStatItr != mEventStats.end()) {
         cout << "found event: " << eventStatItr->first << endl;
@@ -36,8 +39,9 @@ void EventCounter::countEvent(const string& eventTag, unsigned int timestamp)
     }
 }
 
-unsigned int EventCounter::getStat(const string& eventTag, unsigned int pastSeconds) const
+unsigned int EventCounter::getStat(const string& eventTag, unsigned int pastSeconds)
 {
+    ++mNumofGetStats;
     cout << "getting stats of " << eventTag << ".." << endl;
     unsigned int stat = 0;
     auto eventStatItr = mEventStats.find(eventTag);
@@ -48,4 +52,9 @@ unsigned int EventCounter::getStat(const string& eventTag, unsigned int pastSeco
         throw out_of_range("\"" + eventTag + "\" is not valid event tag.");
     }
     return stat;
+}
+
+void EventCounter::printMetrics() const
+{
+    cout << "number of counts: " << mNumofCounts << ", number of get stats: " << mNumofGetStats << endl;
 }
