@@ -16,12 +16,12 @@ int main()
 	    zmq::message_t zmqMessage(3);
     	memcpy(zmqMessage.data(), "abc", 3);
     	eventSocket.send(zmqMessage);
-    	// cout << "An event sent with \"abc\" tag." << endl;
+        cout << "An event sent with \"abc\" tag." << endl;
     	++sentEventsCount;
-    	if (sentEventsCount % 10000 == 0) {
-    		cout << sentEventsCount << " events sent." << endl;
-    	}
-    	// usleep(5000000);  
+//    	if (sentEventsCount % 10000 == 0) {
+//    		cout << sentEventsCount << " events sent." << endl;
+//    	}
+        usleep(5000000);
     }
 
 	return 0;
