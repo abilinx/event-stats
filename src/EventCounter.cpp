@@ -32,9 +32,15 @@ void EventCounter::countEvent(const string& eventTag, unsigned int timestamp)
         eventStatItr->second.count(timestamp);
     }
     else {
-        auto listEventStat = new ListEventStat();
-        listEventStat->count(timestamp);
-        pair<string, EventStat&> eventStatPair(eventTag, *listEventStat);
+
+//        auto listEventStat = new ListEventStat();
+//        listEventStat->count(timestamp);
+//        pair<string, EventStat&> eventStatPair(eventTag, *listEventStat);
+
+        auto compressedEventStat = new CompressedEventStat;
+        compressedEventStat->count(timestamp);
+        pair<string, EventStat&> eventStatPair(eventTag, *compressedEventStat);
+
         mEventStats.insert(eventStatPair);
     }
 }
