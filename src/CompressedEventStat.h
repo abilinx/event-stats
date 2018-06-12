@@ -19,10 +19,11 @@ namespace eventstats
         virtual void count(unsigned int timestamp = 0);
         virtual unsigned int getStat(unsigned int pastSeconds);
 
-        void dumpArrays() const;
+        void dumpWindows() const;
 
     private:
-        void clearWindow(std::vector<unsigned int>& window, unsigned int currentIndex, unsigned int clearDistance);
+        void clearWindow(std::vector<unsigned int>& window, unsigned int startIndex, unsigned int num);
+        unsigned int sumWindow(std::vector<unsigned int>& window, unsigned int startIndex, unsigned int endIndex);
 
         std::vector<unsigned int> mLastMinuteStat;
         std::vector<unsigned int> mLastHourStat;

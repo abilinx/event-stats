@@ -117,52 +117,23 @@ void CompressedEventStat::count(unsigned int timestamp)
     unsigned int daysFromLastUpdate = timestampDay - mLastUpdateDayOfMonth;
     cout << "secondsFromLastUpdate: " << secondsFromLastUpdate << ", minutesFromLastUpdate: " << minutesFromLastUpdate << ", hoursFromLastUpdate: " << hoursFromLastUpdate << ", daysFromLastUpdate: " << daysFromLastUpdate << endl;
 
+    dumpWindows();
 
-    dumpArrays();
     cout << "cleaning up old stats for seconds.." << endl;
-    if (secondsFromLastUpdate > 0) {  // if stats is older than 1 seconds
-        // zero out seconds from secondIndex backwards to minimum of 60 and secondsFromLastUpdate
-        auto minimum = min(secondsFromLastUpdate, static_cast<unsigned int>(60));
-        for (unsigned int j = 0; j < minimum; ++j) {
-            int index = (static_cast<int>(secondIndex) - static_cast<int>(j)) % 60;
-            cout << "index: " << index << endl;
-            mLastMinuteStat[index] = 0;
-        }
-    }
-    dumpArrays();
+    clearWindow(mLastMinuteStat, secondIndex, secondsFromLastUpdate);
+    dumpWindows();
 
     cout << "cleaning up old stats for minutes.." << endl;
-    if (minutesFromLastUpdate > 0) {  // if stats is older than 1 minute
-        // zero out minutes from minuteIndex to minimum of 60 and minutesFromLastUpdate
-        auto minimum = min(minutesFromLastUpdate, static_cast<unsigned int>(60));
-        for (unsigned int j = 0; j < minimum; ++j) {
-            int index = (static_cast<int>(minuteIndex) - static_cast<int>(j)) % 60;
-            mLastHourStat[index] = 0;
-        }
-    }
-    dumpArrays();
+    clearWindow(mLastHourStat, minuteIndex, minutesFromLastUpdate);
+    dumpWindows();
 
     cout << "cleaning up old stats for hours.." << endl;
-    if (hoursFromLastUpdate > 0) {  // if stats is older than 1 hour
-        // zero out hours from hourIndex backwards to minimum of 24 and hoursFromLastUpdate
-        auto minimum = min(hoursFromLastUpdate, static_cast<unsigned int>(24));
-        for (unsigned int j = 0; j < minimum; ++j) {
-            int index = (static_cast<int>(hourIndex) - static_cast<int>(j)) % 60;
-            mLastDayStat[index] = 0;
-        }
-    }
-    dumpArrays();
+    clearWindow(mLastDayStat, hourIndex, hoursFromLastUpdate);
+    dumpWindows();
 
     cout << "cleaning up old stats for days.." << endl;
-    if (daysFromLastUpdate > 0) {  // if stats is older than 1 day
-        // zero out days from dayIndex backwards to minimum of 30 and daysFromLastUpdate
-        auto minimum = min(daysFromLastUpdate, static_cast<unsigned int>(30));
-        for (unsigned int j = 0; j < minimum; ++j) {
-            int index = (static_cast<int>(dayIndex) - static_cast<int>(j)) % 60;
-            mLastMonthStat[index] = 0;
-        }
-    }
-    dumpArrays();
+    clearWindow(mLastMonthStat, dayIndex, daysFromLastUpdate);
+    dumpWindows();
 
     cout << "updating stats.." << endl;
     mLastMinuteStat[secondIndex] += 1;  // update last 1 minute stat
@@ -176,7 +147,7 @@ void CompressedEventStat::count(unsigned int timestamp)
     mLastUpdateHourOfDay = timestampHour;
     mLastUpdateDayOfMonth = timestampDay;
 
-    dumpArrays();
+    dumpWindows();
     cout << "counting completed." << endl;
 }
 
@@ -184,11 +155,61 @@ unsigned int CompressedEventStat::getStat(unsigned int pastSeconds)
 {
     ++mNumofGetStats;
     cout << "getting stat in past seconds " << pastSeconds << " in CompressedEventStat.." << endl;
-    // TODO: Get stat usinng counters.
-    return 0;
+
+    unsigned int currentTime = getSecondsFromEpoch();
+    unsigned int startTime = currentTime - pastSeconds;
+
+    unsigned int currentSecond = currentTime;
+    unsigned int currentMinute = currentSecond / 60;  // ignore seconds
+    unsigned int currentHour = currentMinute / 60;  // ignore minutes
+    unsigned int currentDay = currentHour / 24;  // ignore hours
+    cout << "currentSecond: " << currentSecond << ", currentMinute: " << currentMinute << ", currentHour: " << currentHour << ", currentDay: " << currentDay << endl;
+
+    unsigned int endSecondIndex = currentSecond % 60;  // mLastMinuteStat is for every 1 second in a minute
+    unsigned int endMinuteIndex = currentMinute % 60;  // mLastHourStat is for every 1 minute in an hour
+    unsigned int endHourIndex = currentHour % 24;  // mLastDayStat is for every 1 hour in a day
+    unsigned int endDayIndex = currentDay % 30;  // mLastMonthStat is for every 1 day in a month
+    cout << "secondIndex: " << endSecondIndex << ", minuteIndex: " << endMinuteIndex << ", hourIndex: " << endHourIndex << ", dayIndex: " << endDayIndex << endl;
+
+    unsigned int startSecond = startTime;
+    unsigned int startMinute = startSecond / 60;  // ignore seconds
+    unsigned int startHour = startMinute / 60;  // ignore minutes
+    unsigned int starttDay = startHour / 24;  // ignore hours
+    cout << "startSecond: " << startSecond << ", startMinute: " << startMinute << ", startHour: " << startHour << ", startDay: " << starttDay << endl;
+
+    unsigned int startSecondIndex = startSecond % 60;  // mLastMinuteStat is for every 1 second in a minute
+    unsigned int startMinuteIndex = startMinute % 60;  // mLastHourStat is for every 1 minute in an hour
+    unsigned int startHourIndex = startHour % 24;  // mLastDayStat is for every 1 hour in a day
+    unsigned int startDayIndex = starttDay % 30;  // mLastMonthStat is for every 1 day in a month
+    cout << "startSecondIndex: " << startSecondIndex << ", startMinuteIndex: " << startMinuteIndex << ", startHourIndex: " << startHourIndex << ", startDayIndex: " << startDayIndex << endl;
+
+    unsigned int secondsFromLastUpdate = currentSecond - mLastUpdateSecondOfMinute;
+    unsigned int minutesFromLastUpdate = currentMinute - mLastUpdateMinuteOfHour;
+    unsigned int hoursFromLastUpdate = currentHour - mLastUpdateHourOfDay;
+    unsigned int daysFromLastUpdate = currentDay - mLastUpdateDayOfMonth;
+    clearWindow(mLastMinuteStat, endSecondIndex, secondsFromLastUpdate);
+    clearWindow(mLastHourStat, endMinuteIndex, minutesFromLastUpdate);
+    clearWindow(mLastDayStat, endHourIndex, hoursFromLastUpdate);
+    clearWindow(mLastMonthStat, endDayIndex, daysFromLastUpdate);
+
+    unsigned int stat = 0;
+    if (pastSeconds < 60) {
+        stat += sumWindow(mLastMinuteStat, startSecondIndex, endSecondIndex);
+    }
+    else if (pastSeconds < 3600) {
+        stat += sumWindow(mLastHourStat, startMinuteIndex, endMinuteIndex);
+    }
+    else if (pastSeconds < (3600 * 24)) {
+        stat += sumWindow(mLastDayStat, startHourIndex, endHourIndex);
+    }
+    else {
+        stat += sumWindow(mLastMonthStat, startDayIndex, endDayIndex);
+    }
+
+    return stat;
 }
 
-void CompressedEventStat::dumpArrays() const
+void CompressedEventStat::dumpWindows() const
 {
     cout << "\tminute[";
     for (int i = 0; i < 59; ++i) {
@@ -209,14 +230,38 @@ void CompressedEventStat::dumpArrays() const
     cout << mLastMonthStat[29] << "]\n\t" << mLastUpdateSecondOfMinute << ", " << mLastUpdateMinuteOfHour << ", " << mLastUpdateHourOfDay << ", " << mLastUpdateDayOfMonth << endl;
 }
 
-void CompressedEventStat::clearWindow(vector<unsigned int>& window, unsigned int currentIndex, unsigned int clearDistance)
+void CompressedEventStat::clearWindow(vector<unsigned int>& window, unsigned int startIndex, unsigned int num)
 {
-    if (clearDistance > 0 && currentIndex < window.size()) {
-        clearDistance = min(clearDistance, window.size());
-        for (unsigned int i = 0; i < clearDistance; ++i) {
-            int index = (static_cast<int>(window.size() + currentIndex) - static_cast<int>(i)) % window.size();
+    unsigned int windowSize = window.size();
+    if (num > 0 && startIndex < windowSize) {
+        num = min(num, windowSize);
+        for (unsigned int i = 0; i < num; ++i) {
+            int index = (static_cast<int>(windowSize + startIndex) - static_cast<int>(i)) % windowSize;
             cout << "index: " << index << endl;
             window[index] = 0;
         }
     }
+}
+
+unsigned int CompressedEventStat::sumWindow(vector<unsigned int>& window, unsigned int startIndex, unsigned int endIndex)
+{
+    unsigned int windowSize = window.size();
+    unsigned int sum = 0;
+    if (startIndex < endIndex) {
+        for (unsigned int i = startIndex; i <= endIndex; ++i) {
+            sum += window[i];
+        }
+    }
+    else if (endIndex < startIndex) {
+        for (unsigned int i = startIndex; i < windowSize; ++i) {
+            sum += window[i];
+        }
+        for (unsigned int i = 0; i <= endIndex; ++i) {
+            sum += window[i];
+        }
+    }
+    else {
+        sum = window[startIndex];
+    }
+    return sum;
 }
